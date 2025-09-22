@@ -1,61 +1,91 @@
 import { Stack } from "expo-router";
 import React, { useState } from "react";
+import { Platform, StyleSheet, Text, View } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
-import {
-  Button,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-} from "react-native";
+export default function BuildingInteractive() {
+  const [activeFloor, setActiveFloor] = useState<string | null>(null);
 
-export default function Home() {
-  const [name, setName] = useState("");
-  const [greeting, setGreeting] = useState("");
+  const handleEnter = (id: string) => setActiveFloor(id);
+  const handleLeave = () => setActiveFloor(null);
+
+  const handlePress = (id: string) => {
+    setActiveFloor((prevId) => (prevId === id ? null : id));
+  };
+
+  // Helper to attach correct events depending on platform
+  const getPathProps = (id: string) => {
+    const props: any = {
+      fill: activeFloor === id ? "#4d8ac7" : "#dbd9d7",
+      onPress: () => handlePress(id), // works on iOS + Android
+    };
+
+    if (Platform.OS === "web") {
+      props.onHoverIn = () => handleEnter(id);
+      props.onHoverOut = handleLeave;
+    }
+
+    return props;
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <Text style={styles.title}>Enter your name:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Type here"
-        value={name}
-        onChangeText={setName}
-      />
-      <Button title="Say Hello" onPress={() => setGreeting(`Hello ${name}`)} />
-      {greeting ? <Text style={styles.greeting}>{greeting}</Text> : null}
-    </SafeAreaView>
+      <Svg
+        width={300}
+        height={300}
+        viewBox="0 0 880 880"
+        style={{ backgroundColor: "#fff" }}
+      >
+        {/* === Floor 1 === */}
+        <Path
+          d="M 109.4224,251.4336 393.4124,204.7876 447.249,251.4336 V 307 L 283.99,350 109.4224,307 Z"
+          {...getPathProps("Floor 1")}
+        />
+
+        {/* === Floor 2 === */}
+        <Path
+          d="M 109.4224,307 283.99,350 447.249,307 V 363 L 283.99,406 109.4224,363 Z"
+          {...getPathProps("Floor 2")}
+        />
+
+        {/* === Floor 3 === */}
+        <Path
+          d="M 109.4224,363 283.99,406 447.249,363 V 419 L 283.99,462 109.4224,419 Z"
+          {...getPathProps("Floor 3")}
+        />
+
+        {/* === Floor 4 === */}
+        <Path
+          d="M 109.4224,419 283.99,462 447.249,419 V 475 L 283.99,518 109.4224,475 Z"
+          {...getPathProps("Floor 4")}
+        />
+      </Svg>
+
+      {activeFloor && (
+        <View style={styles.popup}>
+          <Text style={styles.popupText}>You selected {activeFloor}</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#000", // keep dark bg
+    justifyContent: "center",
   },
-  title: {
-    fontSize: 18,
-    marginBottom: 10,
-    color: "#fff", // 👈 white text
-  },
-  input: {
-    borderColor: "#ccc",
-    borderWidth: 1,
+  popup: {
+    position: "absolute",
+    bottom: 50,
+    backgroundColor: "black",
     padding: 10,
-    width: "80%",
-    marginBottom: 10,
-    borderRadius: 5,
-    color: "#fff", // 👈 input text color
-    backgroundColor: "#222", // 👈 darker input bg
+    borderRadius: 6,
   },
-  greeting: {
-    marginTop: 20,
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#0f0", // 👈 green greeting text
+  popupText: {
+    color: "white",
+    fontSize: 16,
   },
 });
